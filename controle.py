@@ -12,12 +12,28 @@ banco = mysql.connector.connect(
     passwd="mysql",
     database="cadastro_produtos"
 )
+cursor = banco.cursor()
+
+def chama_segunda_tela(): # Ao clicar no botão de login vai executar a lógica de comparação dos dados digitados com os que contém no sistema
+    primeira_tela.label_4.setText("") #string vazia para limpar o campo 
+    nome_usuario = primeira_tela.lineEdit.text() # pega a primeira caixa de texto que o usuario digitou e guarda nessa variavel
+    senha = primeira_tela.lineEdit_2.text() # O mesmo para a senha
+    try:
+        cursor.execute("SELECT senha FROM cadastro WHERE login='{}'".format(nome_usuario)) # Pegar a senha gravada no banco de dados, passando cadastro como nome da tabela, 
+        senha_bd = cursor.fetchall()#recuperando a senha do banco para posteriormente realizar a validação
+        #banco.close() # Sempre fechar a conexão com o banco
+    except:
+        print("Erro ao validar o Login") # Criando exceção para não fechar o banco mesmo digitando usuário inexistente
+
+    if senha == senha_bd[0][0] : #Definindo as credencias para comparação
+        primeira_tela.close() # confirmação de login
+        formulario.show() #dentro do sistema
+    else:
+        primeira_tela.label_4.setText(" Dados de Login Incorretos ! ") # caso não for conforme acima não inicializa uma nova tela e informa o erro
 
 def editar_dados():
     global numero_id
     linha = segunda_tela.tableWidget.currentRow()
-
-    cursor = banco.cursor()
     cursor.execute("SELECT id FROM produtos")
     dados_lidos = cursor.fetchall()
     valor_id = dados_lidos[linha][0]
@@ -96,7 +112,7 @@ def  gerar_pdf ():
 
 #Criando a função principal
 
-def funcao_principal():  #função principal para ler os campos, disparada pelo botão
+def funcao_principal():  # função principal para ler os campos, disparada pelo botão
 
     linha1 = formulario.lineEdit.text() #Ler o que foi digitado no formulário ( pegar o primeiro campo)
     linha2 = formulario.lineEdit_2.text()
@@ -119,7 +135,7 @@ def funcao_principal():  #função principal para ler os campos, disparada pelo 
 
     
 
-    print("Código do Produto : ",linha1) # Verificando se esta funcionandOO
+    print("Código do Produto : ",linha1) # Verificando se esta funcionando
     print("Descrição do Produto : ",linha2)
     print("Preço do Produto : ",linha3)
 
@@ -137,7 +153,7 @@ def funcao_principal():  #função principal para ler os campos, disparada pelo 
 def chama_tela():
     segunda_tela.show() #Apresentando nova tela
 
-    cursor = banco.cursor() # Ler os dados do Bd
+    cursor = banco.cursor() # Ler os dados do BD
     comando_SQL = "SELECT * FROM produtos" # Ler a tabela produtos criada
     cursor.execute(comando_SQL) # Executando o comando criado na variavel
     dados_lidos = cursor.fetchall() # pegar o que foi feito na ultima linha do cursor, leu todos os dados do banco salvando na variavel dados_lidos
@@ -155,11 +171,29 @@ def chama_tela():
                                                                                                        # passando a posição para inserir esse elemento na tabela, depois passando o elemento que queremos que seja inserido na tabela (elemento I J para percorrer todas posições novamente )
                                                                                                        # colocando str para converter pois só aceita string e contém elementos inteiros sendo necessário a conversão
 
+def abre_tela_cadastro(): # Ao clicar no botão de abrir a tela de cadastro
+    tela_cadastro.show() # colocando a tela na função para ser chamado posteriormente pelo botão
+
+def cadastrar(): #Lógica de pegar os dados da tela e colocar no banco
+    nome = tela_cadastro.lineEdit.text() # Pegar os dados do formulário, usando a line corresponde com a função teste salvando na variável
+    login = tela_cadastro.lineEdit_2.text()
+    senha = tela_cadastro.lineEdit_3.text()
+    c_senha = tela_cadastro.lineEdit_4.text()
+
+    if (senha == c_senha): # verificando se a senha inserida no primeiro campo é igual a do segundo campo para confirmação
+        cursor.execute("CREATE TABLE IF NOT EXISTS cadastro (nome text,login text,senha text)") # Criando a tabela caso não exista, caso já existir a linha é ignorada
+        cursor.execute("INSERT INTO cadastro VALUES ('"+nome+"','"+login+"','"+senha+"')") # inserindo os dados inseridos no banco
+        banco.commit() # Commit(fazer as alterações no banco)
+        banco.close() # Fechar o banco de dados
+        tela_cadastro.label.setText("Usuario cadastrado com sucesso") # informando ao usuario que foi cadastrado com sucesso
+
+    else:
+        tela_cadastro.label.setText("As senhas digitadas estão diferentes") # informando que as senhas digitas são diferentes
     
 
-
-
 app=QtWidgets.QApplication([]) # Objeto app utilizando a classe widgets e criando a aplicação
+tela_cadastro =uic.loadUi("tela_cadastro.ui")# Carregando a tela de cadastro
+primeira_tela=uic.loadUi("primeira_tela.ui") #Carregando a primeira tela para utilização no código quando necessário
 formulario=uic.loadUi("formulario.ui") # Carregando o arquivo(importando o formulario)
 segunda_tela=uic.loadUi("listar_dados.ui") # Carregando a nova tela( usando o modulo UIC do metodo LOAD de PyQt5)
 tela_editar=uic.loadUi("menu_editar.ui")
@@ -169,9 +203,13 @@ segunda_tela.pushButton.clicked.connect(gerar_pdf) # Criando o botão para gerar
 segunda_tela.pushButton_2.clicked.connect(excluir_dados)
 segunda_tela.pushButton_3.clicked.connect(editar_dados)
 tela_editar.pushButton.clicked.connect(salvar_dados_editados) # botão salvar para incluir e editar
+primeira_tela.pushButton.clicked.connect(chama_segunda_tela)
+primeira_tela.lineEdit_2.setEchoMode(QtWidgets.QLineEdit.Password) # usando QtWidgets com o nome da Classe QlineEdit e usando para criar um campo do tipo senha
+primeira_tela.pushButton_2.clicked.connect(abre_tela_cadastro) # Para quando clicar no botão chamar a tela de cadastro
+tela_cadastro.pushButton.clicked.connect(cadastrar)
 
 
-
-formulario.show() # chamando o aplicativo para apresentar na tela
+primeira_tela.show()
+#formulario.show() # chamando o aplicativo para apresentar na tela
 app.exec() #executando o mesmo para teste ou utilização
 

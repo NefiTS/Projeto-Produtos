@@ -44,13 +44,8 @@ font: 15pt &quot;Bahnschrift Light SemiCondensed&quot;;</string>
    <widget class="QTableWidget" name="tableWidget">
     <property name="geometry">
      <rect>
-<<<<<<< HEAD
-      <x>10</x>
-      <y>59</y>
-=======
       <x>0</x>
       <y>30</y>
->>>>>>> b240441bc677d8fb8202a770894faf16b60c881f
       <width>531</width>
       <height>411</height>
      </rect>

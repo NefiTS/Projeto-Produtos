@@ -9,7 +9,7 @@ numero_id = 0 # Global
 banco = mysql.connector.connect(
     host="localhost",
     user="",
-    passwd="mysql",
+    passwd="",
     database="cadastro_produtos"
 )
 cursor = banco.cursor()

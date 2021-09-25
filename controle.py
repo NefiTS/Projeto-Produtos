@@ -8,7 +8,7 @@ numero_id = 0 # Global
 #criando variável para receber uma instância do mysql connector do metodo connect fazendo a conexão com o banco
 banco = mysql.connector.connect(
     host="localhost",
-    user="root",
+    user="",
     passwd="mysql",
     database="cadastro_produtos"
 )
